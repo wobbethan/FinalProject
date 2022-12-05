@@ -6,6 +6,8 @@
 
 #include "player.h"
 #include "game.h"
+#include "RedBlackTree.h"
+#include "cHRISRedBlackTree.h"
 
 using namespace std;
 
@@ -15,8 +17,12 @@ int main() {
 	map<string, player>::iterator it;
 	string firstName, lastName;
 	int menuOp = -1, tempID, treeSelection;
-	vector<game> tempVector;
-	
+	time_t RBStart, RBEnd;
+	//RB tree
+	redBlack rbTree;
+	RedBlackNode* tempRBN = nullptr;
+	RedBlackNode* root = nullptr;
+
 	//////////////Load Data//////////////
 	fstream Rfile("Roster.csv", ios::in);
 	fstream Gfile("GamesData.csv", ios::in);
@@ -44,7 +50,7 @@ int main() {
 
 		getline(Gfile, home); //skips first line which are heading
 
-		for (int i = 0; i < 100000; i++) {
+		for (int i = 0; i < 11; i++) {
 			getline(Gfile,home, ',');
 			getline(Gfile, away, ',');
 			getline(Gfile, hScore, ',');
@@ -63,11 +69,9 @@ int main() {
 			
 			game tempGameObj = game(home, away, stoi(hScore), stoi(aScore), MVP, stoi(p), stoi(a), stoi(r), stoi(b), stoi(s), stoi(TO), stoi(f), stod(sp), stoi(gameID));
 			//insertion of tempGameObj into B-tree
-			//insertion of tempGameObj into Red-Black Tree
-
-			//playersContainer.find(MVP)->second.addID(stoi(gameID));    //Final version, using game version for testing
-			playersContainer.find(MVP)->second.addID(tempGameObj);
-
+			rbTree.InsertHelp(tempGameObj, stoi(gameID));
+			playersContainer.find(MVP)->second.addID(stoi(gameID));
+	
 		}
 
 	}
@@ -113,7 +117,9 @@ int main() {
 			cout << "-------------------------------------------------------------------------------------------------------\n";
 			for (int i = 0; i < it->second.getVectorSize(); i++) {
 
-				it->second.accessElementAt(i).printData();
+				int tempID = it->second.accessElementAt(i);
+				//RedBlackNode* tempFound = rbTree.searchHelper(tempID);
+				//tempFound->gameObj.printData();
 				cout << endl;
 			}
 			cout << "\n" << it->second.getVectorSize() << " games loaded\n";
@@ -129,6 +135,7 @@ int main() {
 				cout << "Game ID (Valid IDs range from 100000-200000): ";
 				cin >> tempID;
 			}
+			
 
 			//timer start
 			//game temp = BTree.searchID(tempID)
@@ -136,10 +143,15 @@ int main() {
 			// timer stop
 			// print timer
 			// 
-			//timer start
-			//temp = RBTree.searchID(tempID)\
-			//temp.printData();
-			//timer stop
+			RBStart = time(0);
+			cout << "-------------------------------------------------------------------------------------------------------\n";
+			tempRBN = rbTree.searchHelper(tempID);
+			if (tempRBN != nullptr) {
+				tempRBN->gameObj.printData();
+			}
+			
+			RBEnd = time(0)-RBStart;
+			cout<<"Red and Black Tree returned result in: " << RBEnd <<" seconds"<<endl;
 			//print timer
 
 			break;
@@ -160,6 +172,9 @@ int main() {
 				cout << "Game ID: ";
 				cin >> tempID;
 			}
+
+			tempRBN = rbTree.searchHelper(tempID);
+			tempRBN->gameObj.printData();
 			break;
 		case 6:
 			cout << "Exiting...\n";

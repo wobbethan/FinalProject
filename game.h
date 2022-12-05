@@ -26,7 +26,25 @@ private:
 	bool win = false;
 
 public:
+	game() {
+		this->homeTeam = "Miami";
+		this->awayTeam = "";
+		this->homeScore = 0;
+		this->awayScore = 0;
+		this->mvp = "";
+		this->points = 0;
+		this->assists = 0;
+		this->rebounds = 0;
+		this->blocks = 0;
+		this->steals = 0;
+		this->turnOvers = 0;
+		this->fouls = 0;
+		this->shootingPercent =0;
+		this->gameID = 0;
+		this->win = false;
+		
 
+	}
 	game(string home, string away, int hScore, int aScore, string MVP, int p, int a, int r, int b, int s, int TO, int f, double sp, int _gameID) {
 
 		this->homeTeam = home;
@@ -58,6 +76,7 @@ public:
 	}
 
 	void printData() {
+		
 		cout << "Game ID: " << this->gameID ;
 		if (this->win == true)
 			cout << "											    WIN\n";

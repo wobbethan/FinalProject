@@ -11,8 +11,8 @@ class player {
 	private:
 		string name;
 		int jerseyNum;
-		//vector<int> mvpGames;			//Final version, using game version for testing
-		vector<game> mvpGames;
+		vector<int> mvpGames;			
+
 	public:
 
 
@@ -38,22 +38,15 @@ class player {
 			return mvpGames.size();
 		}
 
-		void addID(game game) {
-			mvpGames.push_back(game);
-		}
-
-		game accessElementAt(int i) {
-			return mvpGames[i];
-		}
-		vector<game> getVector() {
+		vector<int> getVector() {
 			return this->mvpGames;
 		}
 
-		//void addID(int ID) {				//Final version, using game version for testing
-		//	mvpGames.push_back(ID);
-		//}
-		//int accessElementAt(int i) {
-		//	return mvpGames[i];
-		//}
+		void addID(int ID) {
+			mvpGames.push_back(ID);
+		}
+		int accessElementAt(int i) {
+			return mvpGames[i];
+		}
 	
 };
