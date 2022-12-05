@@ -7,7 +7,6 @@
 #include "player.h"
 #include "game.h"
 #include "RedBlackTree.h"
-#include "cHRISRedBlackTree.h"
 
 using namespace std;
 
@@ -17,7 +16,7 @@ int main() {
 	map<string, player>::iterator it;
 	string firstName, lastName;
 	int menuOp = -1, tempID, treeSelection;
-	time_t RBStart, RBEnd;
+
 	//RB tree
 	redBlack rbTree;
 	RedBlackNode* tempRBN = nullptr;
@@ -50,7 +49,7 @@ int main() {
 
 		getline(Gfile, home); //skips first line which are heading
 
-		for (int i = 0; i < 11; i++) {
+		for (int i = 0; i < 100000; i++) {
 			getline(Gfile,home, ',');
 			getline(Gfile, away, ',');
 			getline(Gfile, hScore, ',');
@@ -118,8 +117,10 @@ int main() {
 			for (int i = 0; i < it->second.getVectorSize(); i++) {
 
 				int tempID = it->second.accessElementAt(i);
-				//RedBlackNode* tempFound = rbTree.searchHelper(tempID);
-				//tempFound->gameObj.printData();
+				tempRBN = rbTree.searchHelper(tempID);
+				if (tempRBN != nullptr) {
+					tempRBN->gameObj.printData();
+				}
 				cout << endl;
 			}
 			cout << "\n" << it->second.getVectorSize() << " games loaded\n";
@@ -143,27 +144,63 @@ int main() {
 			// timer stop
 			// print timer
 			// 
-			RBStart = time(0);
 			cout << "-------------------------------------------------------------------------------------------------------\n";
 			tempRBN = rbTree.searchHelper(tempID);
 			if (tempRBN != nullptr) {
 				tempRBN->gameObj.printData();
+				//cout << tempRBN->left->ID << " " << tempRBN->right->ID << endl;
+			}
+			else {
+				cout << "ID not found\n";
 			}
 			
-			RBEnd = time(0)-RBStart;
-			cout<<"Red and Black Tree returned result in: " << RBEnd <<" seconds"<<endl;
+			
+
+			cout<<"Red and Black Tree returned result in: "  << " seconds" << endl;
 			//print timer
 
 			break;
 
 		case 4:
 			cout << "Please Select a Tree to use:\n 1. Red/Black Tree\n 2. B-Tree\n";
+			cout << "Selection: ";
 			cin >> treeSelection;
 			cout << "Player name: ";
+			cin >> firstName >> lastName;
+			cout << endl;
+			it = playersContainer.find(firstName + " " + lastName);
+			while (it == playersContainer.end()) { //checks for valid Name 
+				cout << "Player does not Exist \n";
+				cout << "Player Name: ";
+				cin >> firstName >> lastName;
+				it = playersContainer.find(firstName + " " + lastName);
+			}
+
+			cout << "Loading data for " << it->first << "...\n";
+			cout << "-------------------------------------------------------------------------------------------------------\n";
+			for (int i = 0; i < it->second.getVectorSize(); i++) {
+				
+				int tempID = it->second.accessElementAt(i);
+				if (treeSelection == 1) {
+					tempRBN = rbTree.searchHelper(tempID);
+					if (tempRBN != nullptr) {
+						tempRBN->gameObj.printData();
+					}
+				}
+				else {
+					cout << "B tree currently not implemented\n";
+
+				}
+				
+				cout << endl;
+			}
+			cout << "\n" << it->second.getVectorSize() << " games loaded\n";
+			cout << endl;
 			break;
 
 		case 5:
 			cout << "Please Select a Tree to use:\n 1. Red/Black Tree\n 2. B-Tree\n";
+			cout << "Selection: ";
 			cin >> treeSelection;
 			cout << "Game ID: ";
 			cin >> tempID;
@@ -172,9 +209,15 @@ int main() {
 				cout << "Game ID: ";
 				cin >> tempID;
 			}
-
-			tempRBN = rbTree.searchHelper(tempID);
-			tempRBN->gameObj.printData();
+			cout << "-------------------------------------------------------------------------------------------------------\n";
+			if (treeSelection == 1) {
+				tempRBN = rbTree.searchHelper(tempID);
+				tempRBN->gameObj.printData();
+			}
+			else {
+				cout << "B tree currently not implemented\n";
+			}
+			
 			break;
 		case 6:
 			cout << "Exiting...\n";

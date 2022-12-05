@@ -30,26 +30,37 @@ private:
     RedBlackNode* root = nullptr;
 
 public:
+    //////////////////////////////////////////////////////CODE NEEDS TO BE CHANGED//////////////////////////////////////////////////////
 
-    RedBlackNode* RotateLeft(RedBlackNode* n) {  //I think rotations are wrong
-        RedBlackNode* grandchild = n->right->left;
-
-        RedBlackNode* newParent = n->right;
-        newParent->left = n;
-        n->right = grandchild;
-        return newParent;
-        // code taken from lecture slides
-    }
-
-    RedBlackNode* RotateRight(RedBlackNode* n)
+ 
+    RedBlackNode* RotateLeft(RedBlackNode* node)
     {
-        RedBlackNode* grandchild = n->left->right;
-        RedBlackNode* newParent = n->left;
-        newParent->right = n;
-        n->left = grandchild;
-        return newParent;
-        // code taken from lecture slides
+        RedBlackNode* x = node->right;
+        RedBlackNode* y = x->left;
+        x->left = node;
+        node->right = y;
+        node->parent = x; 
+        if (y != nullptr)
+            y->parent = node;
+        return(x);
     }
+    //this function performs right rotation
+    RedBlackNode* RotateRight(RedBlackNode* node)
+    {
+        RedBlackNode* x = node->left;
+        if (x != nullptr) {
+            RedBlackNode* y = x->right;
+            x->right = node;
+            node->left = y;
+            node->parent = x;
+            if (y != nullptr)
+                y->parent = node;
+            return(x);
+        }
+        
+    }
+    ////////////////////////////////////////////////////// CODE NEEDS TO BE CHANGED//////////////////////////////////////////////////////
+
 
     RedBlackNode* returnGrandParent(RedBlackNode* root) {
         if (root->parent->parent == nullptr) { // returns a nullptr if the grandparent is also null
@@ -62,7 +73,6 @@ public:
     }
 
     RedBlackNode* returnUncle(RedBlackNode* root) {
-        // might need to workshop this as assigning the root's parent to parent might not actually make it that item
         if (returnGrandParent(root) != nullptr) {
             if (returnGrandParent(root)->left != nullptr && returnGrandParent(root)->left->ID == root->parent->ID) {
                 return returnGrandParent(root)->right;
@@ -85,27 +95,27 @@ public:
                 returnUncle(root)->red = false;
                 root->parent->red = false;
                 returnGrandParent(root)->red = true;
-                cout << "Changing colors\n";
+               // cout << "Changing colors\n";
         }
         else if (root->red == true && root->parent->red == true) {
-            cout << "Checking rotation\n";
+            //cout << "Checking rotation\n";
                 
                 if (returnGrandParent(root)->right == root->parent && root->parent->left == root) {		//pretty sure the order of everything is right but idk what node the rotation should be called on
-                    cout << " Right left roation\n";
+                   // cout << " Right left roation\n";
                     RotateRight(root->parent);
                     RotateLeft(root);
                     returnGrandParent(root)->red = !returnGrandParent(root)->red;
                     root->red = !root->red;
         		}
         		else if (returnGrandParent(root)->left == root->parent && root->parent->right == root) {
-                    cout << " left right roation\n";
+                    //cout << " left right roation\n";
                     RotateLeft(root->parent);
                     RotateRight(root);
                     returnGrandParent(root)->red = !returnGrandParent(root)->red;
                     root->red = !root->red;
         		}
         		else if (returnGrandParent(root)->left == root->parent && root->parent->left == root) {
-                    cout << "left left roation\n";
+                    //cout << "left left roation\n";
                    RotateRight(root);
                    returnGrandParent(root)->red = !returnGrandParent(root)->red;
                    root->parent->red = !root->parent->red;
@@ -113,8 +123,8 @@ public:
 
                 }
         		else if (returnGrandParent(root)->right == root->parent && root->parent->right == root) {
-                    cout << " Right right roation\n";
-                    RotateLeft(root);
+                    //cout << " Right right roation\n";
+                    //RotateLeft(root);
                     returnGrandParent(root)->red = !returnGrandParent(root)->red;
                     root->parent->red = !root->parent->red;
                 }
@@ -130,7 +140,7 @@ public:
     RedBlackNode* Insert(RedBlackNode* root, RedBlackNode* parent, game gameObj, int ID) {
         if (root == nullptr)
         {
-            cout << "Inserting: "<<ID<<endl;
+            //cout << "Inserting: "<<ID<<endl;
             root = new RedBlackNode(gameObj, ID,parent);
             if (parent != nullptr && parent->ID > root->ID) {
                 parent->left = root;
@@ -175,7 +185,7 @@ public:
         }
 
         //cout << "ID could not be found" << endl; // prints this if no conditions are met, so ID isn't in the tree
-        return nullptr;
+        //return nullptr;
 
     }
 
