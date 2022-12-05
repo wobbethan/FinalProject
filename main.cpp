@@ -3,10 +3,14 @@
 #include<map>
 #include <fstream>
 #include <sstream>
+#include <windows.h>
+#include <chrono>
+HANDLE H = GetStdHandle(STD_OUTPUT_HANDLE); //Used for colored text
 
 #include "player.h"
 #include "game.h"
 #include "RedBlackTree.h"
+#include "BTree.h"
 
 using namespace std;
 
@@ -20,7 +24,16 @@ int main() {
 	//RB tree
 	redBlack rbTree;
 	RedBlackNode* tempRBN = nullptr;
-	RedBlackNode* root = nullptr;
+
+	//BTree
+	BTree bTree(1000); //Each Key can hold up to a thousand games
+
+	//Timer elements
+	auto start = std::chrono::steady_clock::now();
+	auto end = std::chrono::steady_clock::now();
+	double timer;
+
+	game tempGame;
 
 	//////////////Load Data//////////////
 	fstream Rfile("Roster.csv", ios::in);
@@ -67,7 +80,7 @@ int main() {
 
 			
 			game tempGameObj = game(home, away, stoi(hScore), stoi(aScore), MVP, stoi(p), stoi(a), stoi(r), stoi(b), stoi(s), stoi(TO), stoi(f), stod(sp), stoi(gameID));
-			//insertion of tempGameObj into B-tree
+			bTree.insert(tempGameObj, stoi(gameID));
 			rbTree.InsertHelp(tempGameObj, stoi(gameID));
 			playersContainer.find(MVP)->second.addID(stoi(gameID));
 	
@@ -94,74 +107,22 @@ int main() {
 		case 1:
 			cout << "Current Roster\n";
 			for (it = playersContainer.begin(); it != playersContainer.end(); it++) {
-				cout << it->first << " (Jersey Number: " << it->second.getJerseyNum() << ")\n";
+				SetConsoleTextAttribute(H, 14);
+				cout << it->first;
+				SetConsoleTextAttribute(H, 7);
+				cout << " (Jersey Number: ";
+				SetConsoleTextAttribute(H, 12);
+				cout << it->second.getJerseyNum();
+				SetConsoleTextAttribute(H, 7);
+				cout << ")\n";
 			}
 			cout << endl;
 			break;
+
+
+
 
 		case 2:
-			cout << "Player Name: ";
-
-			cin >> firstName >> lastName;
-			cout << endl;
-			it = playersContainer.find(firstName + " " + lastName);
-			while (it == playersContainer.end()) { //checks for valid Name 
-				cout << "Player does not Exist \n";
-				cout << "Player Name: ";
-				cin >> firstName >> lastName;
-				it = playersContainer.find(firstName + " " + lastName);
-			}
-
-			cout << "Loading data for " << it->first << "...\n";
-			cout << "-------------------------------------------------------------------------------------------------------\n";
-			for (int i = 0; i < it->second.getVectorSize(); i++) {
-
-				int tempID = it->second.accessElementAt(i);
-				tempRBN = rbTree.searchHelper(tempID);
-				if (tempRBN != nullptr) {
-					tempRBN->gameObj.printData();
-				}
-				cout << endl;
-			}
-			cout << "\n" << it->second.getVectorSize() << " games loaded\n";
-			cout << endl;
-			break;
-
-
-		case 3:
-			cout << "Game ID: ";
-			cin >> tempID;
-			while ((tempID < 100000) || (tempID > 200000)) { //checks for valid ID 
-				cout << "Invalid ID (Valid IDs range from 100000-200000)\n";
-				cout << "Game ID (Valid IDs range from 100000-200000): ";
-				cin >> tempID;
-			}
-			
-
-			//timer start
-			//game temp = BTree.searchID(tempID)
-			// temp.printData();
-			// timer stop
-			// print timer
-			// 
-			cout << "-------------------------------------------------------------------------------------------------------\n";
-			tempRBN = rbTree.searchHelper(tempID);
-			if (tempRBN != nullptr) {
-				tempRBN->gameObj.printData();
-				//cout << tempRBN->left->ID << " " << tempRBN->right->ID << endl;
-			}
-			else {
-				cout << "ID not found\n";
-			}
-			
-			
-
-			cout<<"Red and Black Tree returned result in: "  << " seconds" << endl;
-			//print timer
-
-			break;
-
-		case 4:
 			cout << "Please Select a Tree to use:\n 1. Red/Black Tree\n 2. B-Tree\n";
 			cout << "Selection: ";
 			cin >> treeSelection;
@@ -179,26 +140,37 @@ int main() {
 			cout << "Loading data for " << it->first << "...\n";
 			cout << "-------------------------------------------------------------------------------------------------------\n";
 			for (int i = 0; i < it->second.getVectorSize(); i++) {
-				
+				start = std::chrono::steady_clock::now();
+
 				int tempID = it->second.accessElementAt(i);
 				if (treeSelection == 1) {
 					tempRBN = rbTree.searchHelper(tempID);
+					end = std::chrono::steady_clock::now();
+					timer = double(std::chrono::duration_cast <std::chrono::microseconds> (end - start).count());
+					cout << "(Elapsed Time: " << timer << " microseconds)" << endl;
 					if (tempRBN != nullptr) {
 						tempRBN->gameObj.printData();
 					}
 				}
 				else {
-					cout << "B tree currently not implemented\n";
-
+					tempGame = bTree.searchID(tempID);
+					end = std::chrono::steady_clock::now();
+					timer = double(std::chrono::duration_cast <std::chrono::microseconds> (end - start).count());
+					cout << "(Elapsed Time: " << timer << " microseconds)" << endl;
+					tempGame.printData();
+					
 				}
+
 				
 				cout << endl;
+
 			}
 			cout << "\n" << it->second.getVectorSize() << " games loaded\n";
+			
 			cout << endl;
 			break;
 
-		case 5:
+		case 3:
 			cout << "Please Select a Tree to use:\n 1. Red/Black Tree\n 2. B-Tree\n";
 			cout << "Selection: ";
 			cin >> treeSelection;
@@ -210,16 +182,59 @@ int main() {
 				cin >> tempID;
 			}
 			cout << "-------------------------------------------------------------------------------------------------------\n";
+			start = std::chrono::steady_clock::now();
 			if (treeSelection == 1) {
 				tempRBN = rbTree.searchHelper(tempID);
 				tempRBN->gameObj.printData();
 			}
 			else {
-				cout << "B tree currently not implemented\n";
+				tempGame = bTree.searchID(tempID);
+				tempGame.printData();
 			}
-			
+
+
+			end = std::chrono::steady_clock::now();
+			timer = double(std::chrono::duration_cast <std::chrono::microseconds> (end - start).count());
+			cout << "Elapsed Time: " << timer << " microseconds" << endl;
+			cout << endl;
 			break;
-		case 6:
+
+		case 4:
+			cout << "Game ID: ";
+			cin >> tempID;
+			while ((tempID < 100000) || (tempID > 200000)) { //checks for valid ID 
+				cout << "Invalid ID (Valid IDs range from 100000-200000)\n";
+				cout << "Game ID (Valid IDs range from 100000-200000): ";
+				cin >> tempID;
+			}
+
+			cout << "-------------------------------------------------------------------------------------------------------\n";
+			start = std::chrono::steady_clock::now(); //Timer start
+			tempGame = bTree.searchID(tempID);
+			tempGame.printData();
+
+			end = std::chrono::steady_clock::now(); //Timer End
+			timer = double(std::chrono::duration_cast <std::chrono::microseconds> (end - start).count());
+			cout << "B-Tree returned result in : " << timer << " microseconds" << endl;
+			cout << "-------------------------------------------------------------------------------------------------------\n";
+			start = std::chrono::steady_clock::now(); //Timer start
+
+			tempRBN = rbTree.searchHelper(tempID);
+			if (tempRBN != nullptr) {
+				tempRBN->gameObj.printData();
+			}
+			else {
+				cout << "ID not found\n";
+			}
+
+
+			end = std::chrono::steady_clock::now(); //Timer End
+			timer = double(std::chrono::duration_cast <std::chrono::microseconds> (end - start).count());
+			cout << "Red and Black Tree returned result in: " <<timer<< " microseconds" << endl;
+			cout << endl;
+			break;
+
+		case 5:
 			cout << "Exiting...\n";
 			break;
 		}
@@ -230,6 +245,6 @@ int main() {
 
 void printMenu() {
 
-	cout << "Select an option:\n 1. Display Current Roster \n 2. Player Search (Only one that functions without tree) \n 3. Game ID Search \n 4. Player Search (using 1 tree) \n 5. Game ID Search (using 1 tree)\n 6. Exit\n";
+	cout << "Select an option:\n 1. Display Current Roster \n 2. Player Search (using 1 tree) \n 3. Game ID Search (using 1 tree) \n 4. Game ID Search (Direct Comparison)\n 5. Exit\n";
 	cout << "Selection: ";
 }

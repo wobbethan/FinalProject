@@ -3,6 +3,8 @@
 #include<iostream>
 #include<String>
 #include<vector>
+#include <windows.h>
+HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE); //Used for colored text
 
 using namespace std;
 
@@ -76,17 +78,27 @@ public:
 	}
 
 	void printData() {
-		
+
+
 		cout << "Game ID: " << this->gameID ;
-		if (this->win == true)
+		if (this->win == true) {
+			SetConsoleTextAttribute(h, 10);
 			cout << "											    WIN\n";
-		else
+		}
+		else {
+			SetConsoleTextAttribute(h, 12);
 			cout << "											   LOSS\n";
+		}
+	
+		SetConsoleTextAttribute(h, 7);
 
 		cout << this->homeTeam << " (" << this->homeScore << " points scored) vs. " << this->awayTeam << " (" << this->awayScore << " points scored)\n";
 
 		cout << endl;
-		cout << "Highest Performing Player: " << this->mvp << endl;
+		cout << "Highest Performing Player: ";
+		SetConsoleTextAttribute(h, 14);
+		cout<< this->mvp << endl;
+		SetConsoleTextAttribute(h, 7);
 		cout << endl;
 		cout << "Points Scored: " << this->points << " Assists " << this->assists << " Rebounds: " << this->rebounds << " Blocks: " << this->blocks<<  " Steals: " << this->steals << " Turn Overs: " << this->turnOvers << " Fouls: " << this->fouls << " Shooting %: " << this->shootingPercent << "%" << endl;
 		cout << endl;
