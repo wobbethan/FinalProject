@@ -15,8 +15,7 @@ class RedBlackNode {
 		RedBlackNode* left = nullptr;
 		RedBlackNode* right = nullptr;
 		RedBlackNode* parent = nullptr;
-		RedBlackNode* grandparent = nullptr;
-		RedBlackNode* uncle = nullptr;
+
 		RedBlackNode() {};
 		RedBlackNode(game obj, int id, RedBlackNode* _parent){
 			this->gameObj = obj;
@@ -32,27 +31,24 @@ private:
 
 public:
 
-    RedBlackNode* RotateLeft(RedBlackNode* node) { //GEEKS FOR GEEKS CHANGE CHANGE CHANGE CHANGE CHANGE 
-        RedBlackNode* x = node->right;
-        RedBlackNode* y = x->left;
-        x->left = node;
-        node->right = y;
-        node->parent = x; // parent resetting is also important.
-        if (y != nullptr)
-            y->parent = node;
-        return(x);
+    RedBlackNode* RotateLeft(RedBlackNode* n) {  //I think rotations are wrong
+        RedBlackNode* grandchild = n->right->left;
+
+        RedBlackNode* newParent = n->right;
+        newParent->left = n;
+        n->right = grandchild;
+        return newParent;
+        // code taken from lecture slides
     }
 
-    RedBlackNode* RotateRight(RedBlackNode* node) //GEEKS FOR GEEKS CHANGE CHANGE CHANGE CHANGE CHANGE 
+    RedBlackNode* RotateRight(RedBlackNode* n)
     {
-        RedBlackNode* x = node->left;
-        RedBlackNode* y = x->right;
-        x->right = node;
-        node->left = y;
-        node->parent = x;
-        if (y != nullptr)
-            y->parent = node;
-        return(x);
+        RedBlackNode* grandchild = n->left->right;
+        RedBlackNode* newParent = n->left;
+        newParent->right = n;
+        n->left = grandchild;
+        return newParent;
+        // code taken from lecture slides
     }
 
     RedBlackNode* returnGrandParent(RedBlackNode* root) {
@@ -81,7 +77,7 @@ public:
 
     
 
-    void maintainProperties(RedBlackNode* root) { //Geeks for Geek
+    void maintainProperties(RedBlackNode* root) { //created mostly with Geeks for Geek psuedocode
         if (root->parent == nullptr) {  //identify root node of tree
             root->red = false; //set root to black;
         }
@@ -91,34 +87,34 @@ public:
                 returnGrandParent(root)->red = true;
                 cout << "Changing colors\n";
         }
-        else if (returnUncle(root) != nullptr && returnUncle(root)->red == false) {
+        else if (root->red == true && root->parent->red == true) {
             cout << "Checking rotation\n";
                 
-                if (returnGrandParent(root)->right == root->parent && root->parent->left == root) {		//Black triangle Right left case
+                if (returnGrandParent(root)->right == root->parent && root->parent->left == root) {		//pretty sure the order of everything is right but idk what node the rotation should be called on
                     cout << " Right left roation\n";
-                    RotateRight(returnGrandParent(root));
-                    RotateLeft(returnGrandParent(root));
+                    RotateRight(root->parent);
+                    RotateLeft(root);
                     returnGrandParent(root)->red = !returnGrandParent(root)->red;
                     root->red = !root->red;
         		}
-        		else if (returnGrandParent(root)->left == root->parent && root->parent->right == root) {		//Black triangle left right case
+        		else if (returnGrandParent(root)->left == root->parent && root->parent->right == root) {
                     cout << " left right roation\n";
-                    RotateLeft(returnGrandParent(root));
-                    RotateRight(returnGrandParent(root));
+                    RotateLeft(root->parent);
+                    RotateRight(root);
                     returnGrandParent(root)->red = !returnGrandParent(root)->red;
                     root->red = !root->red;
         		}
-        		else if (returnGrandParent(root)->left == root->parent && root->parent->left == root) {		//Black line left left case
+        		else if (returnGrandParent(root)->left == root->parent && root->parent->left == root) {
                     cout << "left left roation\n";
-                    RotateRight(returnGrandParent(root));
-                    returnGrandParent(root)->red = !returnGrandParent(root)->red;
-                    root->parent->red = !root->parent->red;
+                   RotateRight(root);
+                   returnGrandParent(root)->red = !returnGrandParent(root)->red;
+                   root->parent->red = !root->parent->red;
 
 
                 }
-        		else if (returnGrandParent(root)->right == root->parent && root->parent->right == root) {		//Black line right right case
+        		else if (returnGrandParent(root)->right == root->parent && root->parent->right == root) {
                     cout << " Right right roation\n";
-                    RotateLeft(returnGrandParent(root));
+                    RotateLeft(root);
                     returnGrandParent(root)->red = !returnGrandParent(root)->red;
                     root->parent->red = !root->parent->red;
                 }
@@ -136,6 +132,13 @@ public:
         {
             cout << "Inserting: "<<ID<<endl;
             root = new RedBlackNode(gameObj, ID,parent);
+            if (parent != nullptr && parent->ID > root->ID) {
+                parent->left = root;
+            }
+            else if(parent != nullptr) {
+                parent->right = root;
+
+            }
             maintainProperties(root);
         }
         else if (ID > root->ID) {
