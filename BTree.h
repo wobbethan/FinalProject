@@ -1,5 +1,4 @@
 #pragma once
-#include <vector>
 #include "game.h"
 using namespace std;
 
@@ -15,6 +14,7 @@ struct BTreeNode {
 
     //////// CONSTRUCTOR //////// 
     BTreeNode(int l, bool leaf);
+    BTreeNode(int l, bool leaf, game* keys, BTreeNode** children, int n);
 
     //////// FUNCTIONS ////////
     void insert(game aGame, int gameID);
@@ -28,13 +28,10 @@ class BTree {
     BTreeNode* root;
     int l;
 
-    //////// HELPER FUNCTIONS ////////
-
 public:
 
     //////// CONSTRUCTOR //////// 
     BTree(int l);
-
 
     //////// FUNCTIONS ////////
     void insert(game aGame, int gameID);
@@ -42,12 +39,12 @@ public:
 
 };
 
-BTree::BTree(int l) {
+BTree::BTree(int l) { // Tree Constructor
     root = nullptr;
     this->l = l;
 }
 
-BTreeNode::BTreeNode(int l, bool leaf) { //Node constructor
+BTreeNode::BTreeNode(int l, bool leaf) { //Node Constructor
     this->leaf = leaf;
     this->l = l;
     keys = new game[l];
@@ -55,19 +52,31 @@ BTreeNode::BTreeNode(int l, bool leaf) { //Node constructor
     n = 0;
 }
 
-void BTreeNode::split(int i, BTreeNode* firstChild) { //Created with Geeks for Geeks and Programiz Psuedocode
-    BTreeNode* secondChild = new BTreeNode(firstChild->l, firstChild->leaf);
-    secondChild->n = l % 2 == 0 ? l / 2 - 1 : l / 2;
-    firstChild->n = l / 2;
+BTreeNode::BTreeNode(int l, bool leaf, game* keys, BTreeNode** children, int n) { // Node Constructor
+    this->leaf = leaf;
+    this->l = l;
+    this->keys = keys;
+    this->children = children;
+    this->n = n;
+}
 
-    for (int j = 0; j < secondChild->n; j++)
-        secondChild->keys[j] = firstChild->keys[j + l / 2 + 1];
+void BTreeNode::split(int i, BTreeNode* firstChild) { //Created with Geeks for Geeks and Programiz Psuedocode
+    int newN = l % 2 == 0 ? l / 2 - 1 : l / 2;
+    game* newKeysArray = new game[l];
+    BTreeNode** newChildrenArray = new BTreeNode * [l + 1];
+
+    for (int j = 0; j < newN; j++)
+        newKeysArray[j] = firstChild->keys[j + l / 2 + 1];
 
     if (firstChild->leaf == false) {
-        for (int j = 0; j < secondChild->n + 1; j++) {
-            secondChild->children[j] = firstChild->children[j + l / 2 + 1];
+        for (int j = 0; j < newN + 1; j++) {
+            newChildrenArray[j] = firstChild->children[j + l / 2 + 1];
         }
     }
+
+    BTreeNode* secondChild = new BTreeNode(firstChild->l, firstChild->leaf, newKeysArray, newChildrenArray, newN);
+
+    firstChild->n = l / 2;
 
     for (int j = n; j >= i + 1; j--)
         children[j + 1] = children[j];
@@ -134,16 +143,13 @@ void BTree::insert(game aGame, int gameID) { //Created with Geeks for Geeks and 
 
 
 
-
-
 game BTree::searchID(int gameID) {
     BTreeNode* node = root->search(gameID);
-    game x = node->keys[0];
     for (int i = 0; i < node->n; i++) {
         if (gameID == node->keys[i].getGameID())
             return node->keys[i];
     }
-    return x;
+    return game();
 }
 
 BTreeNode* BTreeNode::search(int gameID) {
